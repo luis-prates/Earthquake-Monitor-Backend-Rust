@@ -1,8 +1,9 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow)]
+#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
 pub struct Earthquake {
     pub id: Uuid,
     pub usgs_id: Option<String>, // optional but helpful to dedupe USGS feed entries
@@ -11,5 +12,24 @@ pub struct Earthquake {
     pub latitude: f32,
     pub longitude: f32,
     pub depth_km: f32,
+    #[schema(value_type = Option<DateTime<Utc>>)]
     pub time: DateTime<Utc>,
+}
+
+/// Pagination metadata used in list responses
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct Pagination {
+    pub limit: i64,
+    pub offset: i64,
+    pub total: i64,
+}
+
+/// Generic list response wrapper
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct ListResponse<T>
+where
+    T: ToSchema + serde::Serialize,
+{
+    pub data: Vec<T>,
+    pub pagination: Pagination,
 }

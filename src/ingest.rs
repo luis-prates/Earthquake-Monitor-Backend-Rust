@@ -20,7 +20,7 @@ pub async fn run(pool: PgPool) -> Result<()> {
 
     loop {
         if let Err(e) = fetch_and_store(&client, &pool, &feed_url).await {
-            tracing::error!("ingest error: {}", e.root_cause());
+            tracing::error!("ingest error: {}", e);
         }
         sleep(Duration::from_secs(interval_secs)).await;
     }
