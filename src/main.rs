@@ -1,5 +1,7 @@
 use axum::{Json, Router, routing::get};
+use reqwest::StatusCode;
 use std::net::SocketAddr;
+use tracing_appender::rolling;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
@@ -7,15 +9,24 @@ use utoipa_swagger_ui::SwaggerUi;
 mod api_docs;
 mod db;
 mod ingest;
+mod metrics;
 mod models;
 mod routes;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     // tracing/logging
+    let file_appender = rolling::daily("/var/log/earthquake", "server.log");
+    let (non_blocking, _guard) = tracing_appender::non_blocking(file_appender);
+
+    // Console and File layer
+    let console_layer = fmt::layer().with_writer(std::io::stdout);
+    let file_layer = fmt::layer().with_writer(non_blocking);
+
     tracing_subscriber::registry()
         .with(EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info")))
-        .with(fmt::layer())
+        .with(console_layer)
+        .with(file_layer)
         .init();
 
     // Load .env if present
@@ -34,6 +45,10 @@ async fn main() -> anyhow::Result<()> {
         .route("/health", get(routes::health))
         .route("/earthquakes", get(routes::list_earthquakes))
         .route("/earthquakes/{id}", get(routes::get_earthquake))
+        .route(
+            "/metrics",
+            get(|| async { (StatusCode::OK, metrics::gather_metrics()) }),
+        )
         .with_state(pool);
 
     // Mount Swagger UI at /docs, pointing to our openapi.json

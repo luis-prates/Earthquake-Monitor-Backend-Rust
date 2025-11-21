@@ -1,0 +1,18 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "id": "usgs_test_1",
+      "properties": {
+        "mag": 4.2,
+        "place": "Testville",
+        "time": 1609459200000
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [ -122.0, 37.0, 10.0 ]
+      }
+    }
+  ]
+}

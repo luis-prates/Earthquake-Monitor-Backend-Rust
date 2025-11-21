@@ -41,6 +41,9 @@ RUN apt-get update && \
     apt-get install -y --no-install-recommends ca-certificates && \
     rm -rf /var/lib/apt/lists/*
 
+# create log directory and set permission
+RUN mkdir -p /var/log/earthquake && chown 1000:1000 /var/log/earthquake || true
+
 # Copy the executable from the "build" stage.
 COPY --from=builder /bin/server /bin/
 

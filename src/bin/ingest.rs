@@ -8,7 +8,12 @@ use std::time::Duration;
 use tokio::time::sleep;
 use uuid::Uuid;
 
-pub async fn run(pool: PgPool) -> Result<()> {
+#[tokio::main]
+async fn main() -> Result<()> {
+    dotenvy::dotenv().ok();
+    let database_url = env::var("DATABASE_URL")
+        .unwrap_or_else(|_| "postgresql://postgres:postgres@db:5432/earthquakes".into());
+    let pool = PgPool::connect(&database_url).await?;
     let client = Client::new();
     let feed_url = env::var("USGS_FEED_URL").unwrap_or_else(|_| {
         "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson".into()
@@ -74,15 +79,15 @@ async fn fetch_and_store(client: &Client, pool: &PgPool, feed_url: &str) -> Resu
                 let usgs_id_ref = usgs_id.clone();
 
                 // Use ON CONFLICT DO NOTHING on usgs_id to avoid duplicates
-                let result = sqlx::query(
+                sqlx::query(
                     r#"
                     INSERT INTO earthquakes (id, usgs_id, location, magnitude, depth_km, latitude, longitude, time)
                     VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
                     ON CONFLICT (usgs_id) DO NOTHING
                     "#)
                     .bind(id)
-                    .bind(&usgs_id_ref)
-                    .bind(&place)
+                    .bind(usgs_id_ref)
+                    .bind(place)
                     .bind(mag)
                     .bind(depth_km)
                     .bind(lat)
@@ -90,16 +95,6 @@ async fn fetch_and_store(client: &Client, pool: &PgPool, feed_url: &str) -> Resu
                     .bind(time)
                 .execute(pool)
                 .await?;
-
-                let affected = result.rows_affected();
-                if affected > 0 {
-                    tracing::info!(
-                        "insert attempt for usgs_id={:?}, rows_affected={}",
-                        usgs_id_ref,
-                        affected
-                    );
-                    crate::metrics::INGESTED_TOTAL.inc();
-                }
             }
         }
     }
