@@ -6,7 +6,10 @@ use std::time::Duration;
 pub type DbPool = PgPool;
 
 pub async fn init_pool() -> anyhow::Result<DbPool> {
-    let database_url = env::var("POSTGRES_DATABASE_URL")
+    // Load .env if present
+    dotenvy::dotenv().ok();
+
+    let database_url = env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgres://postgres:postgres@db:5432/earthquakes".into());
 
     let pool = PgPoolOptions::new()

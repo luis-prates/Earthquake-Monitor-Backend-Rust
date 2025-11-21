@@ -1,6 +1,6 @@
 # builder
 ARG APP_NAME=earthquake-monitor-backend-rust
-FROM rust:slim-bullseye AS builder
+FROM rust:bullseye AS builder
 ARG APP_NAME
 WORKDIR /app
 
@@ -35,6 +35,11 @@ EOF
 # reproducibility is important, consider using a digest
 # (e.g.,    debian@sha256:ac707220fbd7b67fc19b112cee8170b41a9e97f703f588b2cdbbcdcecdd8af57).
 FROM debian:bullseye-slim AS final
+
+# install runtime packages required for TLS cert verification
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    rm -rf /var/lib/apt/lists/*
 
 # Copy the executable from the "build" stage.
 COPY --from=builder /bin/server /bin/

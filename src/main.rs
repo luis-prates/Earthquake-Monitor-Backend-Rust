@@ -3,6 +3,7 @@ use std::net::SocketAddr;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
 mod db;
+mod ingest;
 mod models;
 mod routes;
 
@@ -19,6 +20,12 @@ async fn main() -> anyhow::Result<()> {
 
     // Create DB pool (not used yet but ready)
     let pool = db::init_pool().await?;
+
+    // spawn ingestion worker in background (optional)
+    let pool_clone = pool.clone();
+    tokio::spawn(async move {
+        ingest::run(pool_clone).await;
+    });
 
     let app = Router::new()
         .route("/health", get(routes::health))
