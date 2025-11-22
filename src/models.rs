@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use utoipa::ToSchema;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, sqlx::FromRow, ToSchema)]
 pub struct Earthquake {
     pub id: Uuid,
     pub usgs_id: Option<String>, // optional but helpful to dedupe USGS feed entries
@@ -17,7 +17,7 @@ pub struct Earthquake {
 }
 
 /// Pagination metadata used in list responses
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct Pagination {
     pub limit: i64,
     pub offset: i64,
@@ -25,7 +25,7 @@ pub struct Pagination {
 }
 
 /// Generic list response wrapper
-#[derive(Debug, Serialize, Deserialize, ToSchema)]
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct ListResponse<T>
 where
     T: ToSchema + serde::Serialize,

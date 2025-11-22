@@ -6,12 +6,9 @@ use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberI
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-mod api_docs;
-mod db;
-mod ingest;
-mod metrics;
-mod models;
-mod routes;
+use earthquake_monitor_backend_rust as app;
+
+use app::{api_docs, db, ingest, metrics, models, routes};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
