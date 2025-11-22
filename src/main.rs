@@ -1,4 +1,4 @@
-use axum::{Json, Router, routing::get};
+use axum::{Router, routing::get};
 use reqwest::StatusCode;
 use std::net::SocketAddr;
 use tracing_appender::rolling;
@@ -8,7 +8,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use earthquake_monitor_backend_rust as app;
 
-use app::{api_docs, db, ingest, metrics, models, routes};
+use app::{api_docs, db, ingest, metrics, routes};
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {

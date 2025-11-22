@@ -8,7 +8,6 @@ use chrono::{TimeZone, Utc};
 use earthquake_monitor_backend_rust::api_docs;
 use earthquake_monitor_backend_rust::models::{Earthquake, ListResponse, Pagination};
 use serde_json::Value;
-use std::net::SocketAddr;
 use tower::ServiceExt;
 use utoipa::OpenApi;
 use uuid::Uuid; // for `oneshot`

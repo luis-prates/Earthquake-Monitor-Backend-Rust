@@ -38,7 +38,7 @@ FROM debian:bullseye-slim AS final
 
 # install runtime packages required for TLS cert verification
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends ca-certificates && \
+    apt-get install -y --no-install-recommends ca-certificates curl && \
     rm -rf /var/lib/apt/lists/*
 
 # create log directory and set permission
@@ -50,5 +50,9 @@ COPY --from=builder /bin/server /bin/
 ENV RUST_LOG=info
 
 EXPOSE 8000
+
+# Healthcheck: verify the /health endpoint returns 200 within 2s
+HEALTHCHECK --interval=15s --timeout=2s --start-period=10s --retries=3 \
+  CMD curl -fsS --max-time 2 http://127.0.0.1:8000/health || exit 1
 
 CMD ["/bin/server"]

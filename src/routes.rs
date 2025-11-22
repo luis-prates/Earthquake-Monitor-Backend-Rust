@@ -78,6 +78,8 @@ pub async fn list_earthquakes(
         idx += 1;
     }
 
+    let _ = idx; // suppress unused warning
+
     if !conditions.is_empty() {
         query.push_str(" WHERE ");
         query.push_str(&conditions.join(" AND "));
