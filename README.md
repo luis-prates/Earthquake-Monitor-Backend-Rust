@@ -9,6 +9,7 @@ Requirements: Docker + Docker Compose, Rust toolchain (optional for building loc
 Start Postgres + app:
 ```bash
 docker compose up --build
+```
 
 ## CI / Tests
 
